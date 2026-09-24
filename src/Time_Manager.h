@@ -43,7 +43,7 @@ class Time_Manager
      * Wajib dipanggil secara konstan di dalam loop() agar ESP32 siap merespons
      * instruksi sinkronisasi dan mengirimkan status balasan (acknowledgement).
      */
-    void serial_feed_handler();
+    void serial_feed_handler(String serial_data = "NULL");
 
     /**
      * @brief Mendapatkan waktu UNIX Epoch saat ini.
@@ -67,43 +67,43 @@ class Time_Manager
      * @brief Mengambil informasi Tahun.
      * @return Angka tahun (contoh: 2026).
      */
-    int get_year();
+    uint16_t get_year();
 
     /**
      * @brief Mengambil informasi Bulan.
      * @return Angka bulan dalam rentang 1 - 12.
      */
-    int get_month();
+    uint8_t get_month();
 
     /**
      * @brief Mengambil indeks Hari dalam seminggu.
      * @return Angka indeks hari (0 = Minggu, 1 = Senin, dst).
      */
-    int get_weekday();
+    uint8_t get_weekday();
 
     /**
      * @brief Mengambil informasi Tanggal pada bulan terkait.
      * @return Angka tanggal dalam rentang 1 - 31.
      */
-    int get_day();
+    uint8_t get_day();
 
     /**
      * @brief Mengambil informasi Jam.
      * @return Angka jam dalam format 24-jam (0 - 23).
      */
-    int get_hour();
+    uint8_t get_hour();
 
     /**
      * @brief Mengambil informasi Menit.
      * @return Angka menit (0 - 59).
      */
-    int get_minute();
+    uint8_t get_minute();
 
     /**
      * @brief Mengambil informasi Detik.
      * @return Angka detik (0 - 59).
      */
-    int get_second();
+    uint8_t get_second();
 
     /**
      * @brief Mengecek apakah ESP32 sudah memiliki waktu yang tervalidasi.

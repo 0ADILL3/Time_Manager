@@ -46,15 +46,32 @@ void Time_Manager::begin()
   }
 }
 
-void Time_Manager::serial_feed_handler()
+void Time_Manager::serial_feed_handler(String serial_data)
 {
-  if (Serial.available())
+  if (serial_data == "NULL")
   {
-    String data = Serial.readStringUntil('\n');
-    
-    if (data.startsWith("[Time_Manager]"))
+    if (Serial.available())
     {
-      uint32_t epoch_time = data.substring(14).toInt();
+      String data = Serial.readStringUntil('\n');
+      
+      if (data.startsWith("[Time_Manager]"))
+      {
+        uint32_t epoch_time = data.substring(14).toInt();
+        
+        update_interval_time_(epoch_time);
+        prefs_.putUInt("last_feed", epoch_time);
+        prefs_.putUInt("last_epoch", epoch_time);
+        last_saved_millis = millis(); 
+        
+        Serial.printf("[Time_Manager] Sinkronisasi via Serial sukses! epoch:%u\n", epoch_time);
+      }
+    }
+  }
+  else
+  {
+    if (serial_data.startsWith("[Time_Manager]"))
+    {
+      uint32_t epoch_time = serial_data.substring(14).toInt();
       
       update_interval_time_(epoch_time);
       prefs_.putUInt("last_feed", epoch_time);
@@ -95,12 +112,12 @@ String Time_Manager::get_time_f(const char* format)
   return String(buffer);
 }
 
-int Time_Manager::get_year()     {return get_time_struct_().tm_year + 1900;}
-int Time_Manager::get_month()    {return get_time_struct_().tm_mon + 1;}
-int Time_Manager::get_weekday()  {return get_time_struct_().tm_wday;}
-int Time_Manager::get_day()      {return get_time_struct_().tm_mday;}
-int Time_Manager::get_hour()     {return get_time_struct_().tm_hour;}
-int Time_Manager::get_minute()   {return get_time_struct_().tm_min;}
-int Time_Manager::get_second()   {return get_time_struct_().tm_sec;}
+uint16_t Time_Manager::get_year()   {return get_time_struct_().tm_year + 1900;}
+uint8_t Time_Manager::get_month()   {return get_time_struct_().tm_mon + 1;}
+uint8_t Time_Manager::get_weekday() {return get_time_struct_().tm_wday;}
+uint8_t Time_Manager::get_day()     {return get_time_struct_().tm_mday;}
+uint8_t Time_Manager::get_hour()    {return get_time_struct_().tm_hour;}
+uint8_t Time_Manager::get_minute()  {return get_time_struct_().tm_min;}
+uint8_t Time_Manager::get_second()  {return get_time_struct_().tm_sec;}
 
 bool Time_Manager::is_ready() {return time(NULL) > TIME_FILTER;}
