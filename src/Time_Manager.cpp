@@ -52,11 +52,11 @@ void Time_Manager::serial_feed_handler(String serial_data)
   {
     if (Serial.available())
     {
-      String data = Serial.readStringUntil('\n');
+      serial_data = Serial.readStringUntil('\n');
       
-      if (data.startsWith("[Time_Manager]"))
+      if (serial_data.startsWith("[Time_Manager]"))
       {
-        uint32_t epoch_time = data.substring(14).toInt();
+        uint32_t epoch_time = serial_data.substring(14).toInt();
         
         update_interval_time_(epoch_time);
         prefs_.putUInt("last_feed", epoch_time);
