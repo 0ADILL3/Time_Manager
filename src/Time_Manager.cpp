@@ -17,7 +17,7 @@ struct tm Time_Manager::get_time_struct_()
 {
   time_t now = get_epoch();
   struct tm timeinfo = {0};
-  if (now > TIME_FILTER) {
+  if (now > TIME_MANAGER_TIME_FILTER) {
     localtime_r(&now, &timeinfo);
   }
   return timeinfo;
@@ -30,7 +30,7 @@ void Time_Manager::begin()
 
   prefs_.begin("Time_Manager", false);
   
-  if (rtc_magic_marker == 0x55AA55AA && rtc_saved_epoch > TIME_FILTER)
+  if (rtc_magic_marker == 0x55AA55AA && rtc_saved_epoch > TIME_MANAGER_TIME_FILTER)
   {
     update_interval_time_(rtc_saved_epoch + 3); 
     Serial.printf("[Time_Manager] Waktu dipulihkan dari RTC RAM: %s\n", get_time_f().c_str());
@@ -38,7 +38,7 @@ void Time_Manager::begin()
   else
   {
     uint32_t last_epoch_nvs = prefs_.getUInt("last_epoch", 0);
-    if (last_epoch_nvs > TIME_FILTER)
+    if (last_epoch_nvs > TIME_MANAGER_TIME_FILTER)
     {
       update_interval_time_(last_epoch_nvs);
       Serial.printf("[Time_Manager] Waktu dipulihkan dari NVS: %s\n", get_time_f().c_str());
@@ -46,40 +46,27 @@ void Time_Manager::begin()
   }
 }
 
-void Time_Manager::serial_feed_handler(String serial_data)
+void Time_Manager::serial_feed_handler()
 {
-  if (serial_data == "NULL")
+  if (Serial.available())
   {
-    if (Serial.available())
-    {
-      serial_data = Serial.readStringUntil('\n');
-      
-      if (serial_data.startsWith("[Time_Manager]"))
-      {
-        uint32_t epoch_time = serial_data.substring(14).toInt();
-        
-        update_interval_time_(epoch_time);
-        prefs_.putUInt("last_feed", epoch_time);
-        prefs_.putUInt("last_epoch", epoch_time);
-        last_saved_millis = millis(); 
-        
-        Serial.printf("[Time_Manager] Sinkronisasi via Serial sukses! epoch:%u\n", epoch_time);
-      }
-    }
+    String serial_data = Serial.readStringUntil('\n');
+    serial_feed_handler(serial_data);
   }
-  else
+}
+
+void Time_Manager::serial_feed_handler(const String &serial_data)
+{
+  if (serial_data.startsWith("[Time_Manager]"))
   {
-    if (serial_data.startsWith("[Time_Manager]"))
-    {
-      uint32_t epoch_time = serial_data.substring(14).toInt();
-      
-      update_interval_time_(epoch_time);
-      prefs_.putUInt("last_feed", epoch_time);
-      prefs_.putUInt("last_epoch", epoch_time);
-      last_saved_millis = millis(); 
-      
-      Serial.printf("[Time_Manager] Sinkronisasi via Serial sukses! epoch:%u\n", epoch_time);
-    }
+    uint32_t epoch_time = serial_data.substring(14).toInt();
+    
+    update_interval_time_(epoch_time);
+    prefs_.putUInt("last_feed", epoch_time);
+    prefs_.putUInt("last_epoch", epoch_time);
+    last_saved_millis = millis(); 
+    
+    Serial.printf("[Time_Manager] Sinkronisasi via Serial sukses! epoch:%u\n", epoch_time);
   }
 }
 
@@ -87,12 +74,12 @@ time_t Time_Manager::get_epoch()
 {
   time_t now = time(NULL);
   
-  if (now > TIME_FILTER)
+  if (now > TIME_MANAGER_TIME_FILTER)
   {
     rtc_saved_epoch = now;
     rtc_magic_marker = 0x55AA55AA;
 
-    if (millis() - last_saved_millis >= NVS_SAVE_INTERVAL)
+    if (millis() - last_saved_millis >= TIME_MANAGER_NVS_SAVE_INTERVAL)
     {
       last_saved_millis = millis();
       prefs_.putUInt("last_epoch", now);
@@ -120,4 +107,4 @@ uint8_t Time_Manager::get_hour()    {return get_time_struct_().tm_hour;}
 uint8_t Time_Manager::get_minute()  {return get_time_struct_().tm_min;}
 uint8_t Time_Manager::get_second()  {return get_time_struct_().tm_sec;}
 
-bool Time_Manager::is_ready() {return time(NULL) > TIME_FILTER;}
+bool Time_Manager::is_ready() {return time(NULL) > TIME_MANAGER_TIME_FILTER;}

@@ -5,8 +5,12 @@
 #include <time.h>
 #include <Preferences.h>
 
-#define TIME_FILTER 1000000000UL
-#define NVS_SAVE_INTERVAL 10*60*1000UL
+#ifndef TIME_MANAGER_TIME_FILTER
+  #define TIME_MANAGER_TIME_FILTER 1000000000UL
+#endif
+#ifndef TIME_MANAGER_NVS_SAVE_INTERVAL
+  #define TIME_MANAGER_NVS_SAVE_INTERVAL 10*60*1000UL
+#endif
 
 /**
  * @class Time_Manager
@@ -38,12 +42,18 @@ class Time_Manager
     void begin();
 
     /**
-     * @brief Pendengar (listener) serial untuk menangkap umpan waktu dari skrip Python.
+     * @brief Pendengar (listener) serial independen untuk menangkap umpan waktu.
      * 
-     * Wajib dipanggil secara konstan di dalam loop() agar ESP32 siap merespons
-     * instruksi sinkronisasi dan mengirimkan status balasan (acknowledgement).
+     * Otomatis membaca antrean data dari Serial jika tersedia.
      */
-    void serial_feed_handler(String serial_data = "NULL");
+    void serial_feed_handler();
+
+    /**
+     * @brief Pendengar (listener) serial menggunakan data eksternal.
+     * 
+     * @param &serial_data String yang ditangkap oleh program utama untuk diproses.
+     */
+    void serial_feed_handler(const String &serial_data);
 
     /**
      * @brief Mendapatkan waktu UNIX Epoch saat ini.
@@ -108,7 +118,7 @@ class Time_Manager
     /**
      * @brief Mengecek apakah ESP32 sudah memiliki waktu yang tervalidasi.
      * 
-     * Waktu dinyatakan valid apabila melewati ambang batas definisi TIME_FILTER (> tahun 2001).
+     * Waktu dinyatakan valid apabila melewati ambang batas definisi TIME_MANAGER_TIME_FILTER (> tahun 2001).
      * 
      * @return true Jika waktu berhasil disinkronkan atau dipulihkan dari memori.
      * @return false Jika ESP32 masih tertahan di tahun 1970.
