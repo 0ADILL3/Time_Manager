@@ -21,12 +21,12 @@ Pustaka ini menggunakan skrip Python untuk melakukan sinkronisasi awal melalui k
 Masukkan pustaka ke dalam kode Anda dan panggil `serial_feed_handler()` di dalam `loop()` utama. Lihat folder `examples/` untuk referensi lengkap yang menyertakan Watchdog Timer (WDT).
 
 ### 2. Sisi Komputer (Python)
-Skrip sinkronisasi berada di dalam folder `tools/time_feeder.py`.
+Skrip sinkronisasi berada di dalam folder `tools/Time_Manager_time_feeder.py`.
 Pastikan Anda telah menginstal pustaka `pyserial`:
 ```bash
 pip install pyserial
 ```
 Lalu jalankan skrip saat ESP32 terhubung ke USB komputer:
 ```bash
-python tools/time_feeder.py
+python tools/Time_Manager_time_feeder.py
 ```
